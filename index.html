@@ -271,7 +271,19 @@
         // Parse CSV data from Google Sheets
         function parseCSV(csv) {
             const lines = csv.trim().split('\n');
-            const result = {};
+            const result = {
+                fund: {
+                    value: 0,
+                    totalShares: 0,
+                    sharePrice: 0
+                },
+                investors: [],
+                performance: {
+                    ytd: 0,
+                    oneYear: 0,
+                    twoYears: 0
+                }
+            };
 
             // Helper to parse value and remove $ sign if present
             const parseValue = (val) => {
@@ -279,58 +291,44 @@
                 return parseFloat(val.replace(/[$,%]/g, '')) || 0;
             };
 
-            // Parse each line (based on actual Google Sheets structure)
+            // Parse each line dynamically
             lines.forEach((line, index) => {
                 const values = line.split(',').map(v => v.trim());
+                const columnA = values[0] || '';
+                const columnB = values[1] || '';
+                const columnD = values[3] || '';
 
-                // Line 0: Headers (skip)
-                // Line 1: Blank row (skip)
-                // Line 2 (Row 3 in sheet): Valeur du fond, $500.00, , Léonie, $180.00, 18, $225.00, 45.00%
-                if (index === 2) {
-                    result.fund = {
-                        value: parseValue(values[1]),
-                        totalShares: 0, // Will calculate later
-                        sharePrice: 0
-                    };
-                    result.investors = [{
-                        name: values[3] || 'Léonie',
-                        investment: parseValue(values[4]),
-                        shares: parseValue(values[5]),
-                        currentValue: parseValue(values[6]),
-                        return: parseValue(values[7])
-                    }];
-                }
-                // Line 3 (Row 4 in sheet): Nombres d'actions, 40, , Éliot, $220.00, 22, $275.00, 55.00%
-                else if (index === 3) {
-                    result.fund.totalShares = parseValue(values[1]);
+                // Skip header rows (first 2 rows)
+                if (index < 2) return;
+
+                // Check for investor data (column D has a name)
+                if (columnD && columnD.length > 0 && !columnA.toLowerCase().includes('rendement')) {
+                    // This row has investor data
                     result.investors.push({
-                        name: values[3] || 'Éliot',
+                        name: columnD,
                         investment: parseValue(values[4]),
                         shares: parseValue(values[5]),
                         currentValue: parseValue(values[6]),
                         return: parseValue(values[7])
                     });
                 }
-                // Line 4 (Row 5 in sheet): Valeurs de l'action, $13
-                else if (index === 4) {
-                    result.fund.sharePrice = parseValue(values[1]);
+
+                // Extract fund information from column A/B
+                if (columnA.toLowerCase().includes('valeur du fond')) {
+                    result.fund.value = parseValue(columnB);
+                } else if (columnA.toLowerCase().includes("nombres d'actions")) {
+                    result.fund.totalShares = parseValue(columnB);
+                } else if (columnA.toLowerCase().includes("valeurs de l'action")) {
+                    result.fund.sharePrice = parseValue(columnB);
                 }
-                // Line 7 (Row 8 in sheet): Rendement du fond (skip)
-                // Line 8 (Row 9 in sheet): Année à date, 0%
-                else if (index === 8) {
-                    result.performance = {
-                        ytd: parseValue(values[1]),
-                        oneYear: 0,
-                        twoYears: 0
-                    };
-                }
-                // Line 9 (Row 10 in sheet): 1 an, 0%
-                else if (index === 9 && result.performance) {
-                    result.performance.oneYear = parseValue(values[1]);
-                }
-                // Line 10 (Row 11 in sheet): 2 ans, 0%
-                else if (index === 10 && result.performance) {
-                    result.performance.twoYears = parseValue(values[1]);
+
+                // Extract performance data
+                if (columnA.toLowerCase().includes('année à date')) {
+                    result.performance.ytd = parseValue(columnB);
+                } else if (columnA === '1 an') {
+                    result.performance.oneYear = parseValue(columnB);
+                } else if (columnA === '2 ans') {
+                    result.performance.twoYears = parseValue(columnB);
                 }
             });
 
