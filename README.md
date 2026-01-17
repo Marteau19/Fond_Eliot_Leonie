@@ -20,16 +20,19 @@ Your Google Sheet should match this structure (same as the screenshot you provid
 
 **Tip:** You can import the `google-sheet-template.csv` file to get started quickly!
 
-|                        |         |   | Investissement | Nbs Actions | Valeurs | Rendement |
-|------------------------|---------|---|----------------|-------------|---------|-----------|
-| Valeur du fond         | $400.00 |   | Léonie         | $180.00     | 18      | $180.00   | 0.00% |
-| Nombres d'actions      | 40      |   | Éliot          | $220.00     | 22      | $220.00   | 0.00% |
-| Valeurs de l'action    | $10     |   |                |             |         |           |       |
-|                        |         |   |                |             |         |           |       |
-| Rendement du fond      |         |   |                |             |         |           |       |
-| Année à date           | 0%      |   |                |             |         |           |       |
-| 1 an                   | 0%      |   |                |             |         |           |       |
-| 2 ans                  | 0%      |   |                |             |         |           |       |
+| Row | Column A               | Column B | Column C | Column D | Column E (Investissement) | Column F (Nbs Actions) | Column G (Valeurs) | Column H (Rendement) |
+|-----|------------------------|----------|----------|----------|---------------------------|------------------------|--------------------|--------------------|
+| 1   | (headers)              |          |          |          | Investissement            | Nbs Actions            | Valeurs            | Rendement          |
+| 2   | (blank)                |          |          |          |                           |                        |                    |                    |
+| 3   | Valeur du fond         | $500.00  |          | Léonie   | $180.00                   | 18                     | $225.00            | 45.00%             |
+| 4   | Nombres d'actions      | 40       |          | Éliot    | $220.00                   | 22                     | $275.00            | 55.00%             |
+| 5   | Valeurs de l'action    | $13      |          |          |                           |                        |                    |                    |
+| 6   | (blank)                |          |          |          |                           |                        |                    |                    |
+| 7   | (blank)                |          |          |          |                           |                        |                    |                    |
+| 8   | Rendement du fond      |          |          |          |                           |                        |                    |                    |
+| 9   | Année à date           | 0%       |          |          |                           |                        |                    |                    |
+| 10  | 1 an                   | 0%       |          |          |                           |                        |                    |                    |
+| 11  | 2 ans                  | 0%       |          |          |                           |                        |                    |                    |
 
 ### Step 2: Publish Your Google Sheet
 
@@ -79,21 +82,27 @@ Once connected to Google Sheets:
 ### Important: Keep the Sheet Structure
 
 Make sure to keep the same structure as shown above. The parser expects:
-- Row 2: Valeur du fond, value, (blank), Léonie, investment, shares, value, return%
-- Row 3: Nombres d'actions, value, (blank), Éliot, investment, shares, value, return%
-- Row 4: Valeurs de l'action, value
-- Row 7: Année à date, value
-- Row 8: 1 an, value
-- Row 9: 2 ans, value
+- Row 1: Headers (Investissement, Nbs Actions, Valeurs, Rendement in columns E-H)
+- Row 2: Blank row
+- Row 3: Valeur du fond, value (B), (blank), Léonie (D), investment (E), shares (F), value (G), return% (H)
+- Row 4: Nombres d'actions, value (B), (blank), Éliot (D), investment (E), shares (F), value (G), return% (H)
+- Row 5: Valeurs de l'action, value (B)
+- Row 9: Année à date, value (B)
+- Row 10: 1 an, value (B)
+- Row 11: 2 ans, value (B)
 
 ### Formulas for Calculations
 
 You can use Google Sheets formulas to auto-calculate:
 
-- **Current Value** = shares × sharePrice
-  - Example: `=C2*F2` (for Léonie)
-- **Return %** = ((currentValue - investment) / investment) × 100
-  - Example: `=(G2-E2)/E2` (for Léonie)
+- **Current Value** (Column G) = shares (Column F) × sharePrice (Cell B5)
+  - For Léonie (Row 3): `=F3*$B$5` → `=18*$B$5` → $225.00 (if share price is $12.50)
+  - For Éliot (Row 4): `=F4*$B$5` → `=22*$B$5` → $275.00
+- **Return %** (Column H) = ((currentValue - investment) / investment) × 100
+  - For Léonie (Row 3): `=(G3-E3)/E3*100` → `=($225-$180)/$180*100` → 25%
+  - For Éliot (Row 4): `=(G4-E4)/E4*100` → `=($275-$220)/$220*100` → 25%
+
+**Note:** Use absolute reference `$B$5` for share price so it doesn't change when copying formulas.
 
 ## Alternative: Manual JSON Updates
 
