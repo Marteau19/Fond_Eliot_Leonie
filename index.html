@@ -344,13 +344,23 @@
 
                 if (GOOGLE_SHEET_CSV_URL) {
                     // Fetch from Google Sheets
+                    console.log('Fetching from Google Sheets:', GOOGLE_SHEET_CSV_URL);
                     const response = await fetch(GOOGLE_SHEET_CSV_URL);
                     const csvText = await response.text();
+                    console.log('CSV received:', csvText.substring(0, 200) + '...');
                     data = parseCSV(csvText);
+                    console.log('Parsed data:', data);
                 } else {
                     // Fallback to local JSON
+                    console.log('Using local data.json');
                     const response = await fetch('data.json');
                     data = await response.json();
+                    console.log('JSON data loaded:', data);
+                }
+
+                // Validate data structure
+                if (!data || !data.fund || !data.investors || !data.performance) {
+                    throw new Error('Invalid data structure');
                 }
 
                 // Update fund overview
@@ -411,7 +421,8 @@
 
             } catch (error) {
                 console.error('Error loading data:', error);
-                alert('Erreur lors du chargement des données. Vérifiez que la feuille Google est publiée.');
+                console.error('Error details:', error.message, error.stack);
+                alert('Erreur lors du chargement des données: ' + error.message + '\n\nVérifiez la console du navigateur (F12) pour plus de détails.');
             }
         }
 
