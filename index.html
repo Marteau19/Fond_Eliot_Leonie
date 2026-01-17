@@ -236,28 +236,121 @@
     </div>
 
     <script>
+        // ============================================
+        // CONFIGURATION - Replace with your Google Sheets URL
+        // ============================================
+        // To get this URL:
+        // 1. Open your Google Sheet
+        // 2. Click File > Share > Publish to web
+        // 3. Choose the specific sheet tab and select "Comma-separated values (.csv)"
+        // 4. Click Publish and copy the URL
+        // 5. Paste it below
+
+        const GOOGLE_SHEET_CSV_URL = '';  // Leave empty to use data.json instead
+
+        // ============================================
+
         // Format currency
         function formatCurrency(amount) {
-            return '$' + amount.toFixed(2);
+            return '$' + parseFloat(amount).toFixed(2);
         }
 
         // Format percentage
         function formatPercentage(value) {
-            return value.toFixed(2) + '%';
+            return parseFloat(value).toFixed(2) + '%';
         }
 
         // Get return class based on value
         function getReturnClass(value) {
-            if (value > 0) return 'return-positive';
-            if (value < 0) return 'return-negative';
+            const num = parseFloat(value);
+            if (num > 0) return 'return-positive';
+            if (num < 0) return 'return-negative';
             return 'return-neutral';
         }
 
-        // Load and display data
+        // Parse CSV data from Google Sheets
+        function parseCSV(csv) {
+            const lines = csv.trim().split('\n');
+            const result = {};
+
+            // Helper to parse value and remove $ sign if present
+            const parseValue = (val) => {
+                if (!val) return 0;
+                return parseFloat(val.replace(/[$,%]/g, '')) || 0;
+            };
+
+            // Parse each line (assuming the sheet structure from the screenshot)
+            lines.forEach((line, index) => {
+                const values = line.split(',').map(v => v.trim());
+
+                // Line 0: Headers (skip)
+                // Line 1: Valeur du fond, $400.00, , Léonie, $180.00, 18, $180.00, 0.00%
+                if (index === 1) {
+                    result.fund = {
+                        value: parseValue(values[1]),
+                        totalShares: 0, // Will calculate later
+                        sharePrice: 0
+                    };
+                    result.investors = [{
+                        name: values[3] || 'Léonie',
+                        investment: parseValue(values[4]),
+                        shares: parseValue(values[5]),
+                        currentValue: parseValue(values[6]),
+                        return: parseValue(values[7])
+                    }];
+                }
+                // Line 2: Nombres d'actions, 40, , Éliot, $220.00, 22, $220.00, 0.00%
+                else if (index === 2) {
+                    result.fund.totalShares = parseValue(values[1]);
+                    result.investors.push({
+                        name: values[3] || 'Éliot',
+                        investment: parseValue(values[4]),
+                        shares: parseValue(values[5]),
+                        currentValue: parseValue(values[6]),
+                        return: parseValue(values[7])
+                    });
+                }
+                // Line 3: Valeurs de l'action, $10
+                else if (index === 3) {
+                    result.fund.sharePrice = parseValue(values[1]);
+                }
+                // Line 5: Rendement du fond
+                // Line 6: Année à date, 0%
+                else if (index === 6) {
+                    result.performance = {
+                        ytd: parseValue(values[1]),
+                        oneYear: 0,
+                        twoYears: 0
+                    };
+                }
+                // Line 7: 1 an, 0%
+                else if (index === 7 && result.performance) {
+                    result.performance.oneYear = parseValue(values[1]);
+                }
+                // Line 8: 2 ans, 0%
+                else if (index === 8 && result.performance) {
+                    result.performance.twoYears = parseValue(values[1]);
+                }
+            });
+
+            return result;
+        }
+
+        // Load data from Google Sheets or JSON
         async function loadData() {
             try {
-                const response = await fetch('data.json');
-                const data = await response.json();
+                let data;
+
+                if (GOOGLE_SHEET_CSV_URL) {
+                    // Fetch from Google Sheets
+                    const response = await fetch(GOOGLE_SHEET_CSV_URL);
+                    const csvText = await response.text();
+                    data = parseCSV(csvText);
+                } else {
+                    // Fallback to local JSON
+                    const response = await fetch('data.json');
+                    data = await response.json();
+                }
 
                 // Update fund overview
                 document.getElementById('fundValue').textContent = formatCurrency(data.fund.value);
@@ -317,15 +410,15 @@
 
             } catch (error) {
                 console.error('Error loading data:', error);
-                alert('Erreur lors du chargement des données');
+                alert('Erreur lors du chargement des données. Vérifiez que la feuille Google est publiée.');
             }
         }
 
         // Load data when page loads
         loadData();
 
-        // Optional: Auto-refresh every 5 minutes
-        // setInterval(loadData, 300000);
+        // Auto-refresh every 5 minutes to get latest data from Google Sheets
+        setInterval(loadData, 300000);
     </script>
 </body>
 </html>

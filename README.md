@@ -5,38 +5,58 @@ A simple, beautiful web page to track and share investment information with your
 ## Features
 
 - Clean, responsive design that works on all devices
-- Easy-to-update JSON data file
+- **Pulls data directly from Google Sheets** - update your sheet and the page updates automatically!
+- Fallback to local JSON data file
 - Automatic calculations and formatting
 - Beautiful gradient design with card-based layout
 - Color-coded returns (green for positive, red for negative)
+- Auto-refreshes every 5 minutes
 
-## How to Update the Data
+## Setup: Connect Your Google Sheet
 
-Simply edit the `data.json` file with your latest values. Here's what each field means:
+### Step 1: Prepare Your Google Sheet
 
-```json
-{
-  "fund": {
-    "value": 400.00,           // Total value of the fund
-    "totalShares": 40,          // Total number of shares
-    "sharePrice": 10.00         // Current price per share
-  },
-  "investors": [
-    {
-      "name": "Léonie",
-      "investment": 180.00,     // Original investment amount
-      "shares": 18,             // Number of shares owned
-      "currentValue": 180.00,   // Current value (shares × sharePrice)
-      "return": 0.00            // Return percentage
-    }
-  ],
-  "performance": {
-    "ytd": 0.00,               // Year-to-date performance %
-    "oneYear": 0.00,           // 1-year performance %
-    "twoYears": 0.00           // 2-year performance %
-  }
-}
-```
+Your Google Sheet should match this structure (same as the screenshot you provided):
+
+**Tip:** You can import the `google-sheet-template.csv` file to get started quickly!
+
+|                        |         |   | Investissement | Nbs Actions | Valeurs | Rendement |
+|------------------------|---------|---|----------------|-------------|---------|-----------|
+| Valeur du fond         | $400.00 |   | Léonie         | $180.00     | 18      | $180.00   | 0.00% |
+| Nombres d'actions      | 40      |   | Éliot          | $220.00     | 22      | $220.00   | 0.00% |
+| Valeurs de l'action    | $10     |   |                |             |         |           |       |
+|                        |         |   |                |             |         |           |       |
+| Rendement du fond      |         |   |                |             |         |           |       |
+| Année à date           | 0%      |   |                |             |         |           |       |
+| 1 an                   | 0%      |   |                |             |         |           |       |
+| 2 ans                  | 0%      |   |                |             |         |           |       |
+
+### Step 2: Publish Your Google Sheet
+
+1. Open your Google Sheet
+2. Click **File > Share > Publish to web**
+3. In the dialog:
+   - Under "Link", select the specific **sheet tab** you want to publish
+   - Change the dropdown from "Web page" to **"Comma-separated values (.csv)"**
+   - Click **"Publish"**
+   - Click **"OK"** to confirm
+4. **Copy the published URL** (it will look like: `https://docs.google.com/spreadsheets/d/e/...`)
+
+### Step 3: Add the URL to Your Web Page
+
+1. Open `index.html` in a text editor
+2. Find this line near the top of the `<script>` section (around line 249):
+   ```javascript
+   const GOOGLE_SHEET_CSV_URL = '';
+   ```
+3. Paste your Google Sheets URL between the quotes:
+   ```javascript
+   const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-...';
+   ```
+4. Save the file
+5. Commit and push to GitHub
+
+**That's it!** Now whenever you update your Google Sheet, the webpage will automatically fetch the latest data (refreshes every 5 minutes, or when you reload the page).
 
 ## Deploying to GitHub Pages
 
@@ -47,38 +67,41 @@ Simply edit the `data.json` file with your latest values. Here's what each field
 5. Click "Save"
 6. Your site will be available at: `https://[your-username].github.io/Fond_Eliot_Leonie/`
 
-## Quick Update Methods
+## How to Update Your Data
 
-### Method 1: Edit on GitHub (Easiest)
-1. Go to your repository on GitHub
-2. Click on `data.json`
-3. Click the pencil icon (Edit this file)
-4. Make your changes
-5. Scroll down and click "Commit changes"
-6. Your site will update automatically in a few seconds
+Once connected to Google Sheets:
 
-### Method 2: Edit Locally
-1. Clone the repository
-2. Edit `data.json` with any text editor
-3. Commit and push:
-   ```bash
-   git add data.json
-   git commit -m "Update investment data"
-   git push
-   ```
+1. Open your Google Sheet
+2. Update any values (fund value, share counts, returns, etc.)
+3. Save the sheet (it auto-saves)
+4. **Done!** The webpage will automatically pull the new data within 5 minutes, or immediately when you refresh the page
 
-### Method 3: From Google Sheets
-If you track data in Google Sheets, you can:
-1. Update your Google Sheet
-2. Copy the values
-3. Update `data.json` using Method 1 or 2 above
+### Important: Keep the Sheet Structure
 
-## Calculating Values
+Make sure to keep the same structure as shown above. The parser expects:
+- Row 2: Valeur du fond, value, (blank), Léonie, investment, shares, value, return%
+- Row 3: Nombres d'actions, value, (blank), Éliot, investment, shares, value, return%
+- Row 4: Valeurs de l'action, value
+- Row 7: Année à date, value
+- Row 8: 1 an, value
+- Row 9: 2 ans, value
 
-To help you update the data correctly:
+### Formulas for Calculations
+
+You can use Google Sheets formulas to auto-calculate:
 
 - **Current Value** = shares × sharePrice
+  - Example: `=C2*F2` (for Léonie)
 - **Return %** = ((currentValue - investment) / investment) × 100
+  - Example: `=(G2-E2)/E2` (for Léonie)
+
+## Alternative: Manual JSON Updates
+
+If you prefer not to use Google Sheets, you can still manually update `data.json`:
+
+1. Leave `GOOGLE_SHEET_CSV_URL` empty in `index.html`
+2. Edit `data.json` directly on GitHub or locally
+3. The page will load from the JSON file instead
 
 ## Customization
 
@@ -90,7 +113,8 @@ You can easily customize the appearance by editing `index.html`:
 ## Files
 
 - `index.html` - The main web page (includes HTML, CSS, and JavaScript)
-- `data.json` - The data file you'll update regularly
+- `google-sheet-template.csv` - Template for your Google Sheet structure
+- `data.json` - Fallback data file (optional if using Google Sheets)
 - `README.md` - This file
 
 ## Support
