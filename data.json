@@ -1,7 +1,7 @@
 {
   "fund": {
-    "value": 400.00,
-    "totalShares": 40,
+    "value": 450.00,
+    "totalShares": 45,
     "sharePrice": 10.00
   },
   "investors": [
@@ -17,6 +17,13 @@
       "investment": 220.00,
       "shares": 22,
       "currentValue": 220.00,
+      "return": 0.00
+    },
+    {
+      "name": "Édouard",
+      "investment": 50.00,
+      "shares": 5,
+      "currentValue": 50.00,
       "return": 0.00
     }
   ],
