@@ -85,21 +85,42 @@
         .investor-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 20px;
+            padding: 25px;
             border-radius: 12px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
         }
 
         .investor-name {
-            font-size: 1.8em;
-            font-weight: bold;
-            margin-bottom: 15px;
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 20px;
             text-align: center;
+            opacity: 0.95;
+        }
+
+        .investor-value-display {
+            margin-bottom: 25px;
+        }
+
+        .investor-value-label {
+            font-size: 0.85em;
+            opacity: 0.8;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .investor-value-amount {
+            font-size: 3.5em;
+            font-weight: bold;
+            line-height: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
 
         .investor-details {
             background: rgba(255,255,255,0.1);
-            padding: 15px;
+            padding: 12px 15px;
             border-radius: 8px;
             backdrop-filter: blur(10px);
         }
@@ -107,21 +128,21 @@
         .detail-row {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding: 6px 0;
+            font-size: 0.85em;
         }
 
-        .detail-row:last-child {
-            border-bottom: none;
+        .detail-row:not(:last-child) {
+            border-bottom: 1px solid rgba(255,255,255,0.15);
         }
 
         .detail-label {
             font-weight: 500;
-            opacity: 0.9;
+            opacity: 0.85;
         }
 
         .detail-value {
-            font-weight: bold;
+            font-weight: 600;
         }
 
         .return-positive {
@@ -178,7 +199,11 @@
             }
 
             .investor-name {
-                font-size: 1.5em;
+                font-size: 1.2em;
+            }
+
+            .investor-value-amount {
+                font-size: 2.8em;
             }
         }
     </style>
@@ -186,24 +211,6 @@
 <body>
     <div class="container">
         <h1>📊 Suivi des Investissements</h1>
-
-        <div class="card">
-            <h2>Informations du Fond</h2>
-            <div class="fund-overview">
-                <div class="metric">
-                    <div class="metric-label">Valeur du Fond</div>
-                    <div class="metric-value" id="fundValue">-</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Nombres d'actions</div>
-                    <div class="metric-value" id="totalShares">-</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Valeur de l'action</div>
-                    <div class="metric-value" id="sharePrice">-</div>
-                </div>
-            </div>
-        </div>
 
         <div class="card">
             <h2>Investissements</h2>
@@ -226,6 +233,24 @@
                 <div class="performance-item">
                     <div class="performance-label">2 ans</div>
                     <div class="performance-value" id="perf2Years">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Informations du Fond</h2>
+            <div class="fund-overview">
+                <div class="metric">
+                    <div class="metric-label">Valeur du Fond</div>
+                    <div class="metric-value" id="fundValue">-</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Nombres d'actions</div>
+                    <div class="metric-value" id="totalShares">-</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Valeur de l'action</div>
+                    <div class="metric-value" id="sharePrice">-</div>
                 </div>
             </div>
         </div>
@@ -378,18 +403,18 @@
 
                     card.innerHTML = `
                         <div class="investor-name">${investor.name}</div>
+                        <div class="investor-value-display">
+                            <div class="investor-value-label">Valeur</div>
+                            <div class="investor-value-amount">${formatCurrency(investor.currentValue)}</div>
+                        </div>
                         <div class="investor-details">
                             <div class="detail-row">
                                 <span class="detail-label">Investissement</span>
                                 <span class="detail-value">${formatCurrency(investor.investment)}</span>
                             </div>
                             <div class="detail-row">
-                                <span class="detail-label">Nbs Actions</span>
+                                <span class="detail-label">Actions</span>
                                 <span class="detail-value">${investor.shares}</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Valeur</span>
-                                <span class="detail-value">${formatCurrency(investor.currentValue)}</span>
                             </div>
                             <div class="detail-row">
                                 <span class="detail-label">Rendement</span>
