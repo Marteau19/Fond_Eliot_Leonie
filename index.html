@@ -24,15 +24,37 @@
             margin: 0 auto;
         }
 
-        h1 {
-            color: #ffffff;
+        .title-container {
             text-align: center;
             margin-bottom: 40px;
-            font-size: 2.8em;
-            font-weight: 600;
-            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 1em;
+            font-weight: 400;
+            letter-spacing: 3px;
             text-transform: uppercase;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 3.5em;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            line-height: 1.2;
+            margin: 0;
+        }
+
+        .title-dynastie {
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .title-martel {
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         .card {
@@ -182,8 +204,13 @@
         }
 
         @media (max-width: 600px) {
+            .subtitle {
+                font-size: 0.8em;
+            }
+
             h1 {
-                font-size: 1.8em;
+                font-size: 2em;
+                letter-spacing: 2px;
             }
 
             .card {
@@ -202,7 +229,12 @@
 </head>
 <body>
     <div class="container">
-        <h1>Le Fond de la Dynastie Martel</h1>
+        <div class="title-container">
+            <div class="subtitle">Le Fond de la</div>
+            <h1>
+                <span class="title-dynastie">Dynastie</span> <span class="title-martel">Martel</span>
+            </h1>
+        </div>
 
         <div class="investors-grid" id="investorsGrid">
             <!-- Investor cards will be dynamically generated -->
@@ -408,18 +440,18 @@
                     investorsGrid.appendChild(card);
                 });
 
-                // Update performance metrics
+                // Update performance metrics (always gold)
                 const perfYTD = document.getElementById('perfYTD');
                 perfYTD.textContent = formatPercentage(data.performance.ytd);
-                perfYTD.className = 'metric-value ' + getReturnClass(data.performance.ytd);
+                perfYTD.className = 'metric-value';
 
                 const perf1Year = document.getElementById('perf1Year');
                 perf1Year.textContent = formatPercentage(data.performance.oneYear);
-                perf1Year.className = 'metric-value ' + getReturnClass(data.performance.oneYear);
+                perf1Year.className = 'metric-value';
 
                 const perf2Years = document.getElementById('perf2Years');
                 perf2Years.textContent = formatPercentage(data.performance.twoYears);
-                perf2Years.className = 'metric-value ' + getReturnClass(data.performance.twoYears);
+                perf2Years.className = 'metric-value';
 
                 // Update last modified date
                 document.getElementById('lastUpdate').textContent = new Date().toLocaleDateString('fr-FR');
