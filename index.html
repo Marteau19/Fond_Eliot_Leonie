@@ -194,6 +194,51 @@
             color: #f5f5f5;
         }
 
+        .companies-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .company-logo-wrapper {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 2px solid #2a2a2a;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .company-logo-wrapper:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+            border-color: #D4AF37;
+        }
+
+        .company-logo-wrapper img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .company-percentage {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: #D4AF37;
+            color: #0a0a0a;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
         .update-info {
             text-align: center;
             color: #666;
@@ -204,6 +249,10 @@
         }
 
         @media (max-width: 600px) {
+            .companies-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
             .subtitle {
                 font-size: 0.8em;
             }
@@ -270,6 +319,13 @@
             </div>
         </div>
 
+        <div class="card" id="companiesSection" style="display: none;">
+            <h2>Nos Investissements</h2>
+            <div class="companies-grid" id="companiesGrid">
+                <!-- Company logos will be dynamically generated -->
+            </div>
+        </div>
+
         <div class="update-info">
             Dernière mise à jour: <span id="lastUpdate">-</span>
         </div>
@@ -322,7 +378,8 @@
                     ytd: 0,
                     oneYear: 0,
                     twoYears: 0
-                }
+                },
+                companies: []
             };
 
             // Helper to parse value and remove $ sign if present
@@ -331,15 +388,35 @@
                 return parseFloat(val.replace(/[$,%]/g, '')) || 0;
             };
 
+            // Track when we hit the "Title" row for companies
+            let inCompaniesSection = false;
+
             // Parse each line dynamically
             lines.forEach((line, index) => {
                 const values = line.split(',').map(v => v.trim());
                 const columnA = values[0] || '';
                 const columnB = values[1] || '';
+                const columnC = values[2] || '';
                 const columnD = values[3] || '';
 
                 // Skip header rows (first 2 rows)
                 if (index < 2) return;
+
+                // Check if we're entering the companies section
+                if (columnA.toLowerCase() === 'title' && columnB.toLowerCase() === 'logo') {
+                    inCompaniesSection = true;
+                    return;
+                }
+
+                // Parse company data if we're in the companies section
+                if (inCompaniesSection && columnA && columnB && columnA.toLowerCase() !== 'title') {
+                    result.companies.push({
+                        name: columnA,
+                        logoUrl: columnB,
+                        percentage: parseValue(columnC)
+                    });
+                    return;
+                }
 
                 // Check for investor data (column D has a name)
                 if (columnD && columnD.length > 0 && !columnA.toLowerCase().includes('rendement')) {
@@ -452,6 +529,28 @@
                 const perf2Years = document.getElementById('perf2Years');
                 perf2Years.textContent = formatPercentage(data.performance.twoYears);
                 perf2Years.className = 'metric-value';
+
+                // Update companies section
+                if (data.companies && data.companies.length > 0) {
+                    const companiesSection = document.getElementById('companiesSection');
+                    const companiesGrid = document.getElementById('companiesGrid');
+
+                    companiesGrid.innerHTML = '';
+
+                    data.companies.forEach(company => {
+                        const logoWrapper = document.createElement('div');
+                        logoWrapper.className = 'company-logo-wrapper';
+                        logoWrapper.innerHTML = `
+                            <img src="${company.logoUrl}" alt="${company.name}" title="${company.name}">
+                            <div class="company-percentage">${formatPercentage(company.percentage)}</div>
+                        `;
+                        companiesGrid.appendChild(logoWrapper);
+                    });
+
+                    companiesSection.style.display = 'block';
+                } else {
+                    document.getElementById('companiesSection').style.display = 'none';
+                }
 
                 // Update last modified date
                 document.getElementById('lastUpdate').textContent = new Date().toLocaleDateString('fr-FR');
