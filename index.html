@@ -540,8 +540,15 @@
                     data.companies.forEach(company => {
                         const logoWrapper = document.createElement('div');
                         logoWrapper.className = 'company-logo-wrapper';
+
+                        // Add cache-busting parameter to ensure fresh image loads
+                        const cacheBuster = new Date().getTime();
+                        const logoUrl = company.logoUrl.includes('?')
+                            ? `${company.logoUrl}&_=${cacheBuster}`
+                            : `${company.logoUrl}?_=${cacheBuster}`;
+
                         logoWrapper.innerHTML = `
-                            <img src="${company.logoUrl}" alt="${company.name}" title="${company.name}">
+                            <img src="${logoUrl}" alt="${company.name}" title="${company.name}">
                             <div class="company-percentage">${formatPercentage(company.percentage)}</div>
                         `;
                         companiesGrid.appendChild(logoWrapper);
